@@ -1,0 +1,36 @@
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.error {
+  min-height: 18px;
+  color: #b42318;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.serverError {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid #b42318;
+  background: #fff3f1;
+  color: #8a1c13;
+  font-size: 13px;
+}
+
+.submit {
+  width: 100%;
+  height: 42px;
+  margin-top: 2px;
+}

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider } from "antd";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
+import { AuthBootstrap } from "@/components/auth-bootstrap";
 
 export function Providers({ children }: PropsWithChildren) {
   const [queryClient] = useState(() => new QueryClient({
@@ -38,7 +39,10 @@ export function Providers({ children }: PropsWithChildren) {
           },
         }}
       >
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthBootstrap />
+          {children}
+        </QueryClientProvider>
       </ConfigProvider>
     </AntdRegistry>
   );

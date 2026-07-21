@@ -4,6 +4,19 @@ spring:
   flyway:
     enabled: false
 
+app:
+  auth:
+    issuer: tiktok-product-insight-test
+    access-token-ttl: 2h
+    refresh-token-ttl: 30d
+    access-secret: test_access_secret_with_at_least_32_characters
+    refresh-secret: test_refresh_secret_with_at_least_32_characters
+    refresh-cookie-secure: false
+    initial-admin:
+      email: ""
+      username: ""
+      password: ""
+
 logging:
   level:
     root: WARN
