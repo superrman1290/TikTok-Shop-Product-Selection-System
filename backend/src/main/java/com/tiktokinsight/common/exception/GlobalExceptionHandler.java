@@ -35,6 +35,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, ApiErrorCode.JSON_FORMAT_ERROR, null);
     }
 
+    @ExceptionHandler(ApiException.class)
+    ResponseEntity<ApiResponse<Void>> handleApiException(ApiException exception) {
+        return error(exception.status(), exception.errorCode(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception exception) {
         LOGGER.error("event=unhandled_exception message=Unexpected request failure", exception);

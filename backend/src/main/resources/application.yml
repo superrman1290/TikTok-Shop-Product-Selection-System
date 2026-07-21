@@ -50,7 +50,7 @@ management:
 info:
   app:
     name: ${spring.application.name}
-    stage: foundation
+    stage: authentication
     version: '@project.version@'
 
 springdoc:
@@ -60,6 +60,17 @@ springdoc:
 app:
   storage:
     path: ${LOCAL_STORAGE_PATH:../data/uploads}
+  auth:
+    issuer: tiktok-product-insight
+    access-token-ttl: 2h
+    refresh-token-ttl: 30d
+    access-secret: ${JWT_ACCESS_SECRET}
+    refresh-secret: ${JWT_REFRESH_SECRET}
+    refresh-cookie-secure: ${AUTH_COOKIE_SECURE:false}
+    initial-admin:
+      email: ${INITIAL_ADMIN_EMAIL:}
+      username: ${INITIAL_ADMIN_USERNAME:}
+      password: ${INITIAL_ADMIN_PASSWORD:}
 
 logging:
   pattern:

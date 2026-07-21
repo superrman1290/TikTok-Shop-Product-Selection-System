@@ -12,6 +12,12 @@ import com.tiktokinsight.common.api.health.SystemHealth;
 import com.tiktokinsight.common.api.health.SystemHealthService;
 import com.tiktokinsight.common.logging.RequestIdFilter;
 import com.tiktokinsight.common.security.SecurityConfiguration;
+import com.tiktokinsight.auth.infrastructure.AccessTokenAuthenticationFilter;
+import com.tiktokinsight.auth.infrastructure.ApiAccessDeniedHandler;
+import com.tiktokinsight.auth.infrastructure.ApiAuthenticationEntryPoint;
+import com.tiktokinsight.auth.infrastructure.SecurityErrorWriter;
+import com.tiktokinsight.auth.infrastructure.TokenService;
+import com.tiktokinsight.auth.domain.UserAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +33,14 @@ import org.springframework.test.web.servlet.MockMvc;
         excludeAutoConfiguration = UserDetailsServiceAutoConfiguration.class
 )
 @AutoConfigureMockMvc
-@Import({RequestIdFilter.class, SecurityConfiguration.class})
+@Import({
+        RequestIdFilter.class,
+        SecurityConfiguration.class,
+        AccessTokenAuthenticationFilter.class,
+        ApiAuthenticationEntryPoint.class,
+        ApiAccessDeniedHandler.class,
+        SecurityErrorWriter.class
+})
 class HealthEndpointIT {
 
     @Autowired
@@ -35,6 +48,12 @@ class HealthEndpointIT {
 
     @MockitoBean
     private SystemHealthService systemHealthService;
+
+    @MockitoBean
+    private TokenService tokenService;
+
+    @MockitoBean
+    private UserAccountRepository userAccountRepository;
 
     @BeforeEach
     void setUp() {
