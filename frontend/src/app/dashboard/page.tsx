@@ -1,6 +1,8 @@
 "use client";
 
-import { CheckCircleFilled } from "@ant-design/icons";
+import { CheckCircleFilled, ShopOutlined } from "@ant-design/icons";
+import { Button } from "antd";
+import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuthStore } from "@/store/auth-store";
@@ -18,10 +20,11 @@ export default function DashboardPage() {
             <div>
               <p className={styles.eyebrow}>Workspace</p>
               <h1>欢迎回来，{user?.username}</h1>
-              <p>你的账号已通过认证，业务工作区将在后续阶段接入。</p>
+              <p>浏览已导入商品、切换市场并查看每日趋势。</p>
             </div>
             <div className={styles.status}><CheckCircleFilled /> 已认证</div>
           </section>
+          <div style={{ marginTop: 24 }}><Link href="/products"><Button type="primary" icon={<ShopOutlined />}>打开商品榜单</Button></Link></div>
           <section className={styles.details} aria-label="当前账号">
             <div className={styles.detail}><span>邮箱</span><strong>{user?.email}</strong></div>
             <div className={styles.detail}><span>角色</span><strong>{user?.role}</strong></div>
