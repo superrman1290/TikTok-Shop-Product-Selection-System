@@ -1,0 +1,9 @@
+spring:
+  main:
+    banner-mode: off
+  flyway:
+    enabled: false
+
+logging:
+  level:
+    root: WARN

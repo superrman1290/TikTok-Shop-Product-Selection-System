@@ -1,0 +1,109 @@
+name: tiktok-product-insight
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-tiktok_insight}
+      MYSQL_USER: ${MYSQL_USER:-tiktok_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
+      TZ: UTC
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+00:00
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+    networks: [app]
+
+  redis:
+    image: redis:7.4-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-change_me}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    networks: [app]
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      BACKEND_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-tiktok_insight}?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+      MYSQL_USER: ${MYSQL_USER:-tiktok_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-change_me}
+      DATABASE_MIGRATIONS_PATH: /app/database/migrations
+      LOCAL_STORAGE_PATH: ${LOCAL_STORAGE_PATH:-/data/uploads}
+    volumes:
+      - object_storage:/data/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+    networks: [app]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [app]
+
+  nginx:
+    image: nginx:1.29-alpine
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    networks: [app]
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  object_storage:
