@@ -65,6 +65,9 @@ app:
   analysis:
     active-version: ${ANALYSIS_ACTIVE_VERSION:selection-v1.0}
     worker-delay-ms: ${ANALYSIS_IMPORT_WORKER_DELAY_MS:10000}
+    daily-cron: ${ANALYSIS_DAILY_CRON:0 30 1 * * *}
+  alert:
+    daily-cron: ${ALERT_DAILY_CRON:0 0 2 * * *}
   storage:
     path: ${LOCAL_STORAGE_PATH:../data/uploads}
   auth:

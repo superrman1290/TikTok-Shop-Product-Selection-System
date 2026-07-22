@@ -2,15 +2,16 @@
 
 import { SearchOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Empty, Input, Select, Table, Tag } from "antd";
+import { Alert, Empty, Input, InputNumber, Select, Table, Tag } from "antd";
 import type { TableColumnsType } from "antd";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/app-header";
 import { ProductImage } from "@/components/product-image";
 import { ProtectedRoute } from "@/components/protected-route";
 import { markets, productApi, type ProductSummary } from "@/lib/products";
 import { useAuthStore } from "@/store/auth-store";
+import { useMarketStore } from "@/store/market-store";
 import styles from "../product-workspace.module.css";
 
 const sortOptions = [
@@ -24,14 +25,21 @@ const sortOptions = [
 export default function ProductsPage() {
   const accessToken = useAuthStore((state) => state.accessToken) ?? "";
   const [page, setPage] = useState(1);
-  const [market, setMarket] = useState<string>();
+  const selectedMarket = useMarketStore((state) => state.selectedMarket);
+  const [market, setMarket] = useState<string>(selectedMarket);
   const [keyword, setKeyword] = useState("");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("collectedAt");
   const [direction, setDirection] = useState("desc");
+  const [lifecycleStage, setLifecycleStage] = useState<string>();
+  const [recommendation, setRecommendation] = useState<string>();
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [minSelectionScore, setMinSelectionScore] = useState<number | null>(null);
+  useEffect(() => { setMarket(selectedMarket); setPage(1); }, [selectedMarket]);
   const products = useQuery({
-    queryKey: ["products", page, market, search, sortBy, direction],
-    queryFn: () => productApi.list(accessToken, { page, pageSize: 20, market, keyword: search, sortBy, direction }),
+    queryKey: ["products", page, market, search, sortBy, direction, lifecycleStage, recommendation, minPrice, maxPrice, minSelectionScore],
+    queryFn: () => productApi.list(accessToken, { page, pageSize: 20, market, keyword: search, sortBy, direction, lifecycleStage, recommendation, minPrice: minPrice ?? undefined, maxPrice: maxPrice ?? undefined, minSelectionScore: minSelectionScore ?? undefined }),
     enabled: Boolean(accessToken),
   });
 
@@ -88,6 +96,11 @@ export default function ProductsPage() {
               placeholder="全部市场"
               allowClear
             />
+            <Select value={lifecycleStage} onChange={(value) => { setPage(1); setLifecycleStage(value); }} allowClear placeholder="生命周期" options={["NEW", "GROWTH", "EXPLOSIVE", "MATURE", "DECLINE"].map((value) => ({ value, label: value }))} />
+            <Select value={recommendation} onChange={(value) => { setPage(1); setRecommendation(value); }} allowClear placeholder="推荐结论" options={["RECOMMENDED", "WATCH", "NOT_RECOMMENDED", "DATA_INSUFFICIENT"].map((value) => ({ value, label: value }))} />
+            <InputNumber aria-label="最低价格" min={0} value={minPrice} onChange={(value) => { setPage(1); setMinPrice(value); }} placeholder="最低价格" />
+            <InputNumber aria-label="最高价格" min={0} value={maxPrice} onChange={(value) => { setPage(1); setMaxPrice(value); }} placeholder="最高价格" />
+            <InputNumber aria-label="最低综合评分" min={0} max={100} value={minSelectionScore} onChange={(value) => { setPage(1); setMinSelectionScore(value); }} placeholder="最低综合评分" />
             <Select value={sortBy} onChange={(value) => { setPage(1); setSortBy(value); }} options={sortOptions} />
             <Select
               value={direction}

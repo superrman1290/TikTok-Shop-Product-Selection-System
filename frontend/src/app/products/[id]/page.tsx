@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowLeftOutlined, CalculatorOutlined, ExportOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { ArrowLeftOutlined, BookOutlined, CalculatorOutlined, ExportOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Descriptions, Empty, Spin, Tag } from "antd";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -10,7 +10,7 @@ import { ProductTrendChart } from "@/components/product-trend-chart";
 import { AnalysisScoreChart } from "@/components/analysis-score-chart";
 import { ProductImage } from "@/components/product-image";
 import { ProtectedRoute } from "@/components/protected-route";
-import { productApi } from "@/lib/products";
+import { productApi, userWorkflowApi } from "@/lib/products";
 import { useAuthStore } from "@/store/auth-store";
 import styles from "../../product-workspace.module.css";
 
@@ -18,6 +18,7 @@ export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const productId = Number(params.id);
   const accessToken = useAuthStore((state) => state.accessToken) ?? "";
+  const queryClient = useQueryClient();
   const product = useQuery({
     queryKey: ["product", productId],
     queryFn: () => productApi.get(accessToken, productId),
@@ -32,6 +33,10 @@ export default function ProductDetailPage() {
     queryKey: ["product-analysis", productId],
     queryFn: () => productApi.analysis(accessToken, productId),
     enabled: Boolean(accessToken && Number.isFinite(productId)),
+  });
+  const addToWatchlist = useMutation({
+    mutationFn: () => userWorkflowApi.addWatchlist(accessToken, productId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["watchlist"] }),
   });
 
   return (
@@ -64,7 +69,11 @@ export default function ProductDetailPage() {
                   {product.data.productUrl && (
                     <p><a href={product.data.productUrl} target="_blank" rel="noreferrer"><ExportOutlined /> 打开商品来源页面</a></p>
                   )}
-                  <Link href={`/products/${productId}/profit`}><Button icon={<CalculatorOutlined />}>利润测算</Button></Link>
+                  <div className={styles.profitActions}>
+                    <Link href={`/products/${productId}/profit`}><Button icon={<CalculatorOutlined />}>利润测算</Button></Link>
+                    <Button icon={<BookOutlined />} loading={addToWatchlist.isPending} onClick={() => addToWatchlist.mutate()}>加入选品库</Button>
+                  </div>
+                  {addToWatchlist.isError && <Alert className={styles.actionError} type="warning" showIcon message="加入选品库失败" description={addToWatchlist.error.message} />}
                 </div>
               </section>
               <section className={styles.analysisBand}>

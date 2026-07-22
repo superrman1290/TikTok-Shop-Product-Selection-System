@@ -147,6 +147,76 @@ export interface ImportRowError {
   errorMessage: string;
 }
 
+export interface WatchlistItem {
+  productId: number;
+  title: string;
+  market: string;
+  currency: string;
+  currentPrice: number;
+  imageUrl?: string;
+  selectionScore?: number;
+  recommendation?: Recommendation;
+  createdAt: string;
+}
+
+export interface AlertRule {
+  id: number;
+  productId: number;
+  salesGrowth7dThreshold?: number;
+  priceDrop7dThreshold?: number;
+  competitionScoreIncreaseThreshold?: number;
+  selectionScoreDropThreshold?: number;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AlertRuleInput {
+  productId: number;
+  salesGrowth7dThreshold?: number;
+  priceDrop7dThreshold?: number;
+  competitionScoreIncreaseThreshold?: number;
+  selectionScoreDropThreshold?: number;
+  enabled: boolean;
+}
+
+export interface AlertEvent {
+  id: number;
+  productId: number;
+  productTitle: string;
+  market: string;
+  alertRuleId: number;
+  metricType: "SALES_GROWTH_7D" | "PRICE_DROP_7D" | "COMPETITION_SCORE_INCREASE" | "SELECTION_SCORE_DROP";
+  statDate: string;
+  metricValue: number;
+  thresholdValue: number;
+  readStatus: boolean;
+  readAt?: string;
+  createdAt: string;
+}
+
+export interface DashboardProduct {
+  productId: number;
+  title: string;
+  market: string;
+  currency: string;
+  currentPrice: number;
+  salesGrowthRate7d?: number;
+  selectionScore?: number;
+  recommendation?: Recommendation;
+}
+
+export interface UserDashboard {
+  market: string;
+  productCount: number;
+  newProducts7d: number;
+  recommendedProducts: number;
+  watchlistProductCount: number;
+  unreadAlertCount: number;
+  topSalesGrowthProducts: DashboardProduct[];
+  topSelectionScoreProducts: DashboardProduct[];
+}
+
 interface ApiEnvelope<T> {
   code: number;
   message: string;
@@ -242,6 +312,42 @@ export const productApi = {
     const body = new FormData();
     body.append("file", file);
     return request<ImportJob>(`/api/v1/admin/imports/${type}`, accessToken, { method: "POST", body });
+  },
+};
+
+export const userWorkflowApi = {
+  dashboard(accessToken: string, market: string) {
+    return request<UserDashboard>(`/api/v1/dashboard?${queryString({ market })}`, accessToken);
+  },
+  watchlist(accessToken: string, params: Record<string, string | number | undefined> = {}) {
+    return request<PageData<WatchlistItem>>(`/api/v1/watchlist?${queryString(params)}`, accessToken);
+  },
+  addWatchlist(accessToken: string, productId: number) {
+    return request<void>(`/api/v1/watchlist/${productId}`, accessToken, { method: "POST" });
+  },
+  removeWatchlist(accessToken: string, productId: number) {
+    return request<void>(`/api/v1/watchlist/${productId}`, accessToken, { method: "DELETE" });
+  },
+  alertRules(accessToken: string) {
+    return request<AlertRule[]>("/api/v1/alert-rules", accessToken);
+  },
+  createAlertRule(accessToken: string, input: AlertRuleInput) {
+    return request<AlertRule>("/api/v1/alert-rules", accessToken, { method: "POST", body: JSON.stringify(input) });
+  },
+  updateAlertRule(accessToken: string, ruleId: number, input: AlertRuleInput) {
+    return request<AlertRule>(`/api/v1/alert-rules/${ruleId}`, accessToken, { method: "PUT", body: JSON.stringify(input) });
+  },
+  deleteAlertRule(accessToken: string, ruleId: number) {
+    return request<void>(`/api/v1/alert-rules/${ruleId}`, accessToken, { method: "DELETE" });
+  },
+  alerts(accessToken: string, params: Record<string, string | number | boolean | undefined>) {
+    return request<PageData<AlertEvent>>(`/api/v1/alerts?${queryString(params as Record<string, string | number | undefined>)}`, accessToken);
+  },
+  markAlertRead(accessToken: string, alertId: number) {
+    return request<void>(`/api/v1/alerts/${alertId}/read`, accessToken, { method: "POST" });
+  },
+  markAllAlertsRead(accessToken: string) {
+    return request<number>("/api/v1/alerts/read-all", accessToken, { method: "POST" });
   },
 };
 

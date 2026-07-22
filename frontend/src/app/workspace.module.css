@@ -61,6 +61,40 @@
   border-bottom: 1px solid #d8e0e2;
 }
 
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 28px;
+  border: 1px solid #d8e0e2;
+  background: #fff;
+}
+
+.metricGrid :global(.ant-statistic) {
+  min-width: 0;
+  padding: 20px;
+  border-right: 1px solid #d8e0e2;
+}
+
+.metricGrid :global(.ant-statistic:last-child) { border-right: 0; }
+
+.tableBand {
+  margin-top: 24px;
+  overflow: hidden;
+  border: 1px solid #d8e0e2;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.bandTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid #d8e0e2;
+}
+
+.bandTitle h2 { margin: 0; font-size: 16px; }
+
 .detail {
   min-width: 0;
   padding: 24px;
@@ -107,6 +141,9 @@
   .details {
     grid-template-columns: 1fr;
   }
+
+  .metricGrid { grid-template-columns: 1fr 1fr; }
+  .metricGrid :global(.ant-statistic) { border-bottom: 1px solid #d8e0e2; }
 
   .detail {
     border-right: 0;

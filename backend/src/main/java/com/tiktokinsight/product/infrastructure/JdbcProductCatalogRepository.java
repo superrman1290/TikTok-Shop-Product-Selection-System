@@ -149,6 +149,17 @@ public class JdbcProductCatalogRepository implements ProductCatalogRepository {
             where.append(" AND p.status = :status");
             parameters.put("status", query.status().name());
         }
+        if (query.minPrice() != null) { where.append(" AND p.current_price >= :minPrice"); parameters.put("minPrice", query.minPrice()); }
+        if (query.maxPrice() != null) { where.append(" AND p.current_price <= :maxPrice"); parameters.put("maxPrice", query.maxPrice()); }
+        if (query.lifecycleStage() != null || query.recommendation() != null || query.minSelectionScore() != null || query.maxSelectionScore() != null) {
+            where.append(" AND EXISTS (SELECT 1 FROM product_analysis_snapshot snapshot WHERE snapshot.product_id = p.id AND snapshot.analysis_date = p.latest_stat_date AND snapshot.algorithm_version = :algorithmVersion");
+            parameters.put("algorithmVersion", query.algorithmVersion());
+            if (query.lifecycleStage() != null) { where.append(" AND snapshot.lifecycle_stage = :lifecycleStage"); parameters.put("lifecycleStage", query.lifecycleStage()); }
+            if (query.recommendation() != null) { where.append(" AND snapshot.recommendation = :recommendation"); parameters.put("recommendation", query.recommendation()); }
+            if (query.minSelectionScore() != null) { where.append(" AND snapshot.selection_score >= :minSelectionScore"); parameters.put("minSelectionScore", query.minSelectionScore()); }
+            if (query.maxSelectionScore() != null) { where.append(" AND snapshot.selection_score <= :maxSelectionScore"); parameters.put("maxSelectionScore", query.maxSelectionScore()); }
+            where.append(")");
+        }
     }
 
     private ProductSummary summary(ResultSet resultSet) throws SQLException {
