@@ -158,6 +158,155 @@
   border-top: 1px solid #d8e0e2;
 }
 
+.analysisBand {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #d8e0e2;
+}
+
+.analysisHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.analysisHeading h2,
+.reasonGrid h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.analysisHeading p {
+  margin: 6px 0 0;
+  color: #66717c;
+  font-size: 13px;
+}
+
+.analysisGrid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(280px, 1.1fr);
+  gap: 16px;
+}
+
+.analysisScores,
+.scoreDetails,
+.reasonGrid {
+  border: 1px solid #d8e0e2;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.analysisScores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.analysisScores div {
+  min-height: 90px;
+  padding: 16px;
+  border-right: 1px solid #d8e0e2;
+  border-bottom: 1px solid #d8e0e2;
+}
+
+.analysisScores div:nth-child(2n) {
+  border-right: 0;
+}
+
+.analysisScores div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.analysisScores span,
+.analysisScores strong {
+  display: block;
+}
+
+.analysisScores span {
+  margin-bottom: 8px;
+  color: #77828c;
+  font-size: 12px;
+}
+
+.analysisScores strong {
+  color: #17202a;
+  font-size: 17px;
+}
+
+.scoreDetails {
+  overflow: hidden;
+}
+
+.reasonGrid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.reasonGrid > div {
+  min-height: 130px;
+  padding: 16px;
+}
+
+.reasonGrid > div + div {
+  border-left: 1px solid #d8e0e2;
+}
+
+.reasonGrid ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: #46515d;
+  line-height: 1.7;
+}
+
+.reasonGrid span {
+  display: block;
+  margin-top: 12px;
+  color: #77828c;
+  font-size: 13px;
+}
+
+.profitTitle {
+  margin: 18px 0 0;
+  font-size: 28px;
+}
+
+.profitGrid {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(320px, 0.9fr);
+  gap: 20px;
+}
+
+.profitForm,
+.profitResult {
+  padding: 20px;
+  border: 1px solid #d8e0e2;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.profitForm :global(.ant-form) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 14px;
+}
+
+.numberInput {
+  width: 100%;
+}
+
+.profitActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actionError {
+  margin-top: 16px;
+}
+
 .chartBand h2 {
   margin: 0 0 16px;
   font-size: 18px;
@@ -224,6 +373,14 @@
   .detailGrid {
     grid-template-columns: 260px minmax(0, 1fr);
   }
+
+  .analysisGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .profitGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 700px) {
@@ -258,5 +415,30 @@
 
   .fact:last-child {
     border-bottom: 0;
+  }
+
+  .analysisScores,
+  .reasonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .analysisScores div,
+  .analysisScores div:nth-child(2n),
+  .analysisScores div:nth-last-child(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px solid #d8e0e2;
+  }
+
+  .analysisScores div:last-child {
+    border-bottom: 0;
+  }
+
+  .reasonGrid > div + div {
+    border-top: 1px solid #d8e0e2;
+    border-left: 0;
+  }
+
+  .profitForm :global(.ant-form) {
+    grid-template-columns: 1fr;
   }
 }
