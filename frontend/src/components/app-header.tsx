@@ -1,6 +1,6 @@
 "use client";
 
-import { LogoutOutlined, SettingOutlined, UserOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, ImportOutlined, LogoutOutlined, SettingOutlined, ShopOutlined, UserOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,9 @@ export function AppHeader() {
           <strong>TikTok Product Insight</strong>
         </Link>
         <nav className={styles.nav} aria-label="账号导航">
+          <Link href="/products"><ShopOutlined /> 商品</Link>
+          {user?.role === "ADMIN" && <Link href="/admin/products"><AppstoreOutlined /> 商品管理</Link>}
+          {user?.role === "ADMIN" && <Link href="/admin/imports"><ImportOutlined /> 导入</Link>}
           {user?.role === "ADMIN" && <Link href="/admin"><SettingOutlined /> 管理入口</Link>}
           <Link href="/profile"><UserOutlined /> 账号</Link>
           <Button type="text" icon={<LogoutOutlined />} onClick={logout}>退出</Button>

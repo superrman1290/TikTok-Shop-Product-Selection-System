@@ -1,0 +1,121 @@
+CREATE TABLE category (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    platform VARCHAR(40) NOT NULL,
+    market VARCHAR(10) NOT NULL,
+    external_id VARCHAR(160) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    created_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_category_external UNIQUE (platform, market, external_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE shop (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    platform VARCHAR(40) NOT NULL,
+    market VARCHAR(10) NOT NULL,
+    external_id VARCHAR(160) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    created_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_shop_external UNIQUE (platform, market, external_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE product (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    external_product_id VARCHAR(160) NOT NULL,
+    platform VARCHAR(40) NOT NULL,
+    market VARCHAR(10) NOT NULL,
+    title VARCHAR(500) NOT NULL,
+    category_id BIGINT NOT NULL,
+    shop_id BIGINT NOT NULL,
+    currency CHAR(3) NOT NULL,
+    current_price DECIMAL(18, 2) NOT NULL,
+    original_price DECIMAL(18, 2) NULL,
+    image_url VARCHAR(1500) NULL,
+    product_url VARCHAR(1500) NULL,
+    rating DECIMAL(4, 2) NULL,
+    review_count BIGINT NOT NULL DEFAULT 0,
+    listed_at TIMESTAMP(6) NULL,
+    collected_at TIMESTAMP(6) NOT NULL,
+    latest_stat_date DATE NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES category (id),
+    CONSTRAINT fk_product_shop FOREIGN KEY (shop_id) REFERENCES shop (id),
+    CONSTRAINT uk_product_external UNIQUE (platform, market, external_product_id),
+    CONSTRAINT chk_product_status CHECK (status IN ('ACTIVE', 'INACTIVE', 'REMOVED')),
+    INDEX idx_product_market_category_status_price (market, category_id, status, current_price),
+    INDEX idx_product_market_category_listed (market, category_id, listed_at),
+    INDEX idx_product_status_latest_stat (status, latest_stat_date),
+    INDEX idx_product_market_status_collected (market, status, collected_at, id),
+    INDEX idx_product_market_status_rating (market, status, rating, id),
+    INDEX idx_product_market_status_reviews (market, status, review_count, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE product_daily_stat (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    product_id BIGINT NOT NULL,
+    stat_date DATE NOT NULL,
+    price DECIMAL(18, 2) NOT NULL,
+    sales_volume BIGINT NOT NULL,
+    sales_amount DECIMAL(18, 2) NOT NULL,
+    total_sales_volume BIGINT NOT NULL,
+    video_count BIGINT NOT NULL,
+    creator_count BIGINT NOT NULL,
+    shop_count BIGINT NOT NULL,
+    similar_product_count BIGINT NOT NULL,
+    top10_shop_sales_share DECIMAL(10, 4) NULL,
+    top10_creator_sales_share DECIMAL(10, 4) NULL,
+    negative_review_rate DECIMAL(10, 4) NULL,
+    review_count BIGINT NOT NULL,
+    rating DECIMAL(4, 2) NULL,
+    created_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_product_daily_stat_product FOREIGN KEY (product_id) REFERENCES product (id),
+    CONSTRAINT uk_product_daily_stat UNIQUE (product_id, stat_date),
+    INDEX idx_product_daily_stat_product_date (product_id, stat_date),
+    INDEX idx_product_daily_stat_date_product (stat_date, product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE import_job (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    import_type VARCHAR(30) NOT NULL,
+    source_type VARCHAR(30) NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    original_file_name VARCHAR(255) NOT NULL,
+    object_key VARCHAR(255) NOT NULL,
+    total_rows BIGINT NOT NULL DEFAULT 0,
+    success_rows BIGINT NOT NULL DEFAULT 0,
+    failed_rows BIGINT NOT NULL DEFAULT 0,
+    created_by BIGINT NOT NULL,
+    started_at TIMESTAMP(6) NULL,
+    completed_at TIMESTAMP(6) NULL,
+    created_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_import_job_user FOREIGN KEY (created_by) REFERENCES user_account (id),
+    CONSTRAINT chk_import_job_type CHECK (import_type IN ('PRODUCT', 'PRODUCT_STAT')),
+    CONSTRAINT chk_import_job_source CHECK (source_type IN ('CSV', 'MOCK')),
+    CONSTRAINT chk_import_job_status CHECK (status IN ('PENDING', 'RUNNING', 'SUCCESS', 'PARTIAL_SUCCESS', 'FAILED', 'CANCELLED')),
+    INDEX idx_import_job_status_created (status, created_at),
+    INDEX idx_import_job_created_by_created (created_by, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE import_job_error (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    import_job_id BIGINT NOT NULL,
+    row_index BIGINT NOT NULL,
+    field_name VARCHAR(100) NOT NULL,
+    raw_value VARCHAR(500) NULL,
+    error_code VARCHAR(80) NOT NULL,
+    error_message VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_import_error_job FOREIGN KEY (import_job_id) REFERENCES import_job (id) ON DELETE CASCADE,
+    INDEX idx_import_error_job_row (import_job_id, row_index)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
