@@ -54,7 +54,7 @@ management:
 info:
   app:
     name: ${spring.application.name}
-    stage: product-data
+    stage: analysis
     version: '@project.version@'
 
 springdoc:
@@ -62,6 +62,9 @@ springdoc:
     path: /swagger-ui.html
 
 app:
+  analysis:
+    active-version: ${ANALYSIS_ACTIVE_VERSION:selection-v1.0}
+    worker-delay-ms: ${ANALYSIS_IMPORT_WORKER_DELAY_MS:10000}
   storage:
     path: ${LOCAL_STORAGE_PATH:../data/uploads}
   auth:

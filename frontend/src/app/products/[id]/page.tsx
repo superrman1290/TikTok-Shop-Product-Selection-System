@@ -1,12 +1,13 @@
 "use client";
 
-import { ArrowLeftOutlined, ExportOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, CalculatorOutlined, ExportOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Button, Empty, Spin, Tag } from "antd";
+import { Alert, Button, Descriptions, Empty, Spin, Tag } from "antd";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
 import { ProductTrendChart } from "@/components/product-trend-chart";
+import { AnalysisScoreChart } from "@/components/analysis-score-chart";
 import { ProductImage } from "@/components/product-image";
 import { ProtectedRoute } from "@/components/protected-route";
 import { productApi } from "@/lib/products";
@@ -25,6 +26,11 @@ export default function ProductDetailPage() {
   const stats = useQuery({
     queryKey: ["product-stats", productId],
     queryFn: () => productApi.stats(accessToken, productId),
+    enabled: Boolean(accessToken && Number.isFinite(productId)),
+  });
+  const analysis = useQuery({
+    queryKey: ["product-analysis", productId],
+    queryFn: () => productApi.analysis(accessToken, productId),
     enabled: Boolean(accessToken && Number.isFinite(productId)),
   });
 
@@ -58,7 +64,37 @@ export default function ProductDetailPage() {
                   {product.data.productUrl && (
                     <p><a href={product.data.productUrl} target="_blank" rel="noreferrer"><ExportOutlined /> 打开商品来源页面</a></p>
                   )}
+                  <Link href={`/products/${productId}/profit`}><Button icon={<CalculatorOutlined />}>利润测算</Button></Link>
                 </div>
+              </section>
+              <section className={styles.analysisBand}>
+                <div className={styles.analysisHeading}>
+                  <div><h2>选品分析</h2><p>算法版本 selection-v1.0，数据日期以商品最近统计为准。</p></div>
+                  {analysis.data && <Tag>{analysis.data.recommendation}</Tag>}
+                </div>
+                {analysis.isLoading && <Spin />}
+                {analysis.isError && <Alert type="warning" showIcon message="分析结果暂不可用" description={analysis.error.message} />}
+                {analysis.data && (
+                  <div className={styles.analysisGrid}>
+                    <div className={styles.analysisScores}>
+                      <div><span>综合评分</span><strong>{analysis.data.selectionScore?.toFixed(2) ?? "数据不足"}</strong></div>
+                      <div><span>生命周期</span><strong>{analysis.data.lifecycleStage ?? "-"}</strong></div>
+                      <div><span>近7日销量</span><strong>{analysis.data.salesVolume7d?.toLocaleString() ?? "-"}</strong></div>
+                      <div><span>利润率</span><strong>{analysis.data.estimatedProfitMargin?.toFixed(2) ?? "-"}%</strong></div>
+                    </div>
+                    <AnalysisScoreChart analysis={analysis.data} />
+                    <Descriptions className={styles.scoreDetails} size="small" column={2} bordered>
+                      <Descriptions.Item label="趋势评分">{analysis.data.trendScore?.toFixed(2) ?? "-"}</Descriptions.Item>
+                      <Descriptions.Item label="竞争评分">{analysis.data.competitionScore?.toFixed(2) ?? "-"}</Descriptions.Item>
+                      <Descriptions.Item label="利润评分">{analysis.data.profitScore?.toFixed(2) ?? "-"}</Descriptions.Item>
+                      <Descriptions.Item label="风险评分">{analysis.data.riskScore?.toFixed(2) ?? "-"}</Descriptions.Item>
+                    </Descriptions>
+                    <div className={styles.reasonGrid}>
+                      <div><h3>推荐依据</h3>{analysis.data.reasons.length ? <ul>{analysis.data.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul> : <span>当前没有满足阈值的正向指标。</span>}</div>
+                      <div><h3>风险提示</h3>{analysis.data.risks.length ? <ul>{analysis.data.risks.map((risk) => <li key={risk}>{risk}</li>)}</ul> : <span>当前没有满足阈值的风险指标。</span>}</div>
+                    </div>
+                  </div>
+                )}
               </section>
               <section className={styles.chartBand}>
                 <h2>每日销量与价格趋势</h2>

@@ -1,6 +1,6 @@
 # TikTok Shop Product Selection System
 
-The repository currently includes the deployable foundation, authentication and authorization, and Stage 03 product-data workflow. Administrators can import product and daily-stat CSV files, inspect row-level errors, and maintain product basics. Authenticated users can browse a server-paginated product ranking, open product details, and inspect daily price and sales trends.
+The repository currently includes the deployable foundation, authentication and authorization, product-data import, and Stage 04 analysis workflow. Administrators can import product and daily-stat CSV files, inspect row-level errors, and maintain product basics. Authenticated users can browse product trends, inspect the versioned `selection-v1.0` analysis, resolve market or personal product costs, and run a profit calculation.
 
 ## Requirements
 
@@ -58,6 +58,10 @@ powershell -ExecutionPolicy Bypass -File deploy/scripts/stage-03-performance-tes
 ```
 
 CSV imports accept UTF-8 files up to 20 MB and 200,000 rows. Product writes are idempotent by `platform + market + external_product_id`; daily statistics are idempotent by `product_id + stat_date`.
+
+## Analysis workflow
+
+`GET /api/v1/products/{productId}/analysis` returns the latest `selection-v1.0` snapshot. Snapshots are versioned by product, analysis date, and algorithm version. The analysis worker persists P75 category benchmarks before calculating scores and uses a database lease to avoid duplicate execution in multiple instances. Market default costs are seeded for the eight supported markets; a user may save an isolated per-product override or use the default from `/products/{id}/profit`.
 
 ## Repository layout
 
