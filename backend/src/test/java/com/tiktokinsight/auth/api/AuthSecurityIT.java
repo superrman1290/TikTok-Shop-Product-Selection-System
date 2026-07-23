@@ -24,6 +24,7 @@ import com.tiktokinsight.auth.infrastructure.ApiAuthenticationEntryPoint;
 import com.tiktokinsight.auth.infrastructure.AuthProperties;
 import com.tiktokinsight.auth.infrastructure.SecurityErrorWriter;
 import com.tiktokinsight.auth.infrastructure.TokenService;
+import com.tiktokinsight.audit.application.AuditService;
 import com.tiktokinsight.common.exception.GlobalExceptionHandler;
 import com.tiktokinsight.common.logging.RequestIdFilter;
 import com.tiktokinsight.common.security.SecurityConfiguration;
@@ -67,6 +68,9 @@ class AuthSecurityIT {
 
     @MockitoBean
     private AccountAdministrationService administrationService;
+
+    @MockitoBean
+    private AuditService auditService;
 
     @MockitoBean
     private ClientIpResolver clientIpResolver;

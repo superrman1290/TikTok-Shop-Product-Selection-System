@@ -1,6 +1,10 @@
 package com.tiktokinsight.product.api;
 
 import com.tiktokinsight.common.api.ApiResponse;
+import com.tiktokinsight.audit.application.AuditService;
+import com.tiktokinsight.auth.application.AccessPrincipal;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.tiktokinsight.common.api.PageResponse;
 import com.tiktokinsight.common.logging.RequestIdFilter;
 import com.tiktokinsight.product.application.ProductCatalogService;
@@ -22,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductAdministrationController {
 
     private final ProductCatalogService service;
+    private final AuditService auditService;
 
-    public ProductAdministrationController(ProductCatalogService service) {
+    public ProductAdministrationController(ProductCatalogService service, AuditService auditService) {
         this.service = service;
+        this.auditService = auditService;
     }
 
     @GetMapping
@@ -51,8 +57,12 @@ public class ProductAdministrationController {
     @PutMapping("/{productId}")
     public ApiResponse<ProductDetail> update(
             @PathVariable long productId,
-            @Valid @RequestBody ProductAdministrationRequest request
+            @Valid @RequestBody ProductAdministrationRequest request,
+            @AuthenticationPrincipal AccessPrincipal principal,
+            HttpServletRequest servletRequest
     ) {
-        return ApiResponse.success(service.update(productId, request.toUpdate()), RequestIdFilter.currentRequestId());
+        var product = service.update(productId, request.toUpdate());
+        auditService.record(principal, "PRODUCT_UPDATED", "PRODUCT", String.valueOf(productId), "SUCCESS", "{\"title\":\"" + product.title() + "\"}", servletRequest);
+        return ApiResponse.success(product, RequestIdFilter.currentRequestId());
     }
 }

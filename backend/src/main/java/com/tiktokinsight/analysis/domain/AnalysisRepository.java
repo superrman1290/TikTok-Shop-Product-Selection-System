@@ -36,6 +36,8 @@ public interface AnalysisRepository {
 
     List<AnalysisTarget> findRecalculationTargets(String algorithmVersion, int limit);
 
+    List<AnalysisTarget> findAllActiveTargets();
+
     List<AnalysisJob> findRunnableJobs(Instant now, int limit);
 
     boolean claim(long jobId, Instant now);
