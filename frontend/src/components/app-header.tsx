@@ -1,17 +1,21 @@
 "use client";
 
-import { AppstoreOutlined, ImportOutlined, LogoutOutlined, SettingOutlined, ShopOutlined, UserOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { AppstoreOutlined, BellOutlined, BookOutlined, ImportOutlined, LogoutOutlined, SettingOutlined, ShopOutlined, UserOutlined } from "@ant-design/icons";
+import { Button, Select } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/auth";
 import { useAuthStore } from "@/store/auth-store";
+import { useMarketStore } from "@/store/market-store";
+import { markets } from "@/lib/products";
 import styles from "./app-header.module.css";
 
 export function AppHeader() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const clearSession = useAuthStore((state) => state.clearSession);
+  const selectedMarket = useMarketStore((state) => state.selectedMarket);
+  const setSelectedMarket = useMarketStore((state) => state.setSelectedMarket);
 
   const logout = async () => {
     try {
@@ -31,6 +35,9 @@ export function AppHeader() {
         </Link>
         <nav className={styles.nav} aria-label="账号导航">
           <Link href="/products"><ShopOutlined /> 商品</Link>
+          {user?.role !== "ADMIN" && <Select size="small" aria-label="全局市场" value={selectedMarket} onChange={setSelectedMarket} options={markets.map((market) => ({ value: market, label: market }))} />}
+          {user?.role !== "ADMIN" && <Link href="/watchlist"><BookOutlined /> 选品库</Link>}
+          {user?.role !== "ADMIN" && <Link href="/alerts"><BellOutlined /> 提醒</Link>}
           {user?.role === "ADMIN" && <Link href="/admin/products"><AppstoreOutlined /> 商品管理</Link>}
           {user?.role === "ADMIN" && <Link href="/admin/imports"><ImportOutlined /> 导入</Link>}
           {user?.role === "ADMIN" && <Link href="/admin"><SettingOutlined /> 管理入口</Link>}

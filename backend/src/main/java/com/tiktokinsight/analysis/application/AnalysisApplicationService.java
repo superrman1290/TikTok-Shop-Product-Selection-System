@@ -92,6 +92,11 @@ public class AnalysisApplicationService {
         }
     }
 
+    @Transactional
+    public void compensateMissingSnapshots() {
+        reconcileTargets();
+    }
+
     private void reconcileTargets() {
         Set<String> benchmarkKeys = new HashSet<>();
         for (var target : repository.findRecalculationTargets(activeVersion, 50)) {

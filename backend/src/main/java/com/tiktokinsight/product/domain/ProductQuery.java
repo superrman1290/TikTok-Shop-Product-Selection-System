@@ -1,5 +1,7 @@
 package com.tiktokinsight.product.domain;
 
+import java.math.BigDecimal;
+
 public record ProductQuery(
         int page,
         int pageSize,
@@ -7,6 +9,13 @@ public record ProductQuery(
         Long categoryId,
         String keyword,
         ProductStatus status,
+        BigDecimal minPrice,
+        BigDecimal maxPrice,
+        String lifecycleStage,
+        String recommendation,
+        BigDecimal minSelectionScore,
+        BigDecimal maxSelectionScore,
+        String algorithmVersion,
         ProductSort sort,
         SortDirection direction
 ) {

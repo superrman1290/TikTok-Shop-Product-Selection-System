@@ -11,6 +11,7 @@ import com.tiktokinsight.product.domain.ProductQuery;
 import com.tiktokinsight.product.domain.ProductStatus;
 import com.tiktokinsight.product.domain.ProductSummary;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,26 @@ public class ProductCatalogService {
             String sortBy,
             String direction
     ) {
-        if (page < 1 || pageSize < 1 || pageSize > 100) {
+        return query(page, pageSize, market, categoryId, keyword, status, null, null, null, null, null, null, sortBy, direction);
+    }
+
+    public static ProductQuery query(
+            int page,
+            int pageSize,
+            String market,
+            Long categoryId,
+            String keyword,
+            ProductStatus status,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            String lifecycleStage,
+            String recommendation,
+            BigDecimal minSelectionScore,
+            BigDecimal maxSelectionScore,
+            String sortBy,
+            String direction
+    ) {
+        if (page < 1 || pageSize < 1 || pageSize > 100 || invalidRange(minPrice, maxPrice) || invalidRange(minSelectionScore, maxSelectionScore)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, ApiErrorCode.VALIDATION_FAILED);
         }
         return new ProductQuery(
@@ -65,7 +85,8 @@ public class ProductCatalogService {
                 normalize(market),
                 categoryId,
                 keyword == null || keyword.isBlank() ? null : keyword.trim(),
-                status,
+                status, minPrice, maxPrice, normalizedEnum(lifecycleStage, "NEW", "GROWTH", "EXPLOSIVE", "MATURE", "DECLINE"),
+                normalizedEnum(recommendation, "RECOMMENDED", "WATCH", "NOT_RECOMMENDED", "DATA_INSUFFICIENT"), minSelectionScore, maxSelectionScore, "selection-v1.0",
                 com.tiktokinsight.product.domain.ProductSort.fromApiValue(sortBy),
                 com.tiktokinsight.product.domain.SortDirection.fromApiValue(direction)
         );
@@ -73,5 +94,13 @@ public class ProductCatalogService {
 
     private static String normalize(String value) {
         return value == null || value.isBlank() ? null : value.trim().toUpperCase();
+    }
+
+    private static boolean invalidRange(BigDecimal min, BigDecimal max) { return min != null && max != null && min.compareTo(max) > 0; }
+    private static String normalizedEnum(String value, String... allowed) {
+        if (value == null || value.isBlank()) return null;
+        String normalized = value.trim().toUpperCase();
+        for (String candidate : allowed) if (candidate.equals(normalized)) return normalized;
+        throw new ApiException(HttpStatus.BAD_REQUEST, ApiErrorCode.VALIDATION_FAILED);
     }
 }

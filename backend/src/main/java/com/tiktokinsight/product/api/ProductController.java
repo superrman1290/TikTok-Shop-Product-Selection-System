@@ -8,6 +8,7 @@ import com.tiktokinsight.product.domain.ProductDailyStat;
 import com.tiktokinsight.product.domain.ProductDetail;
 import com.tiktokinsight.product.domain.ProductStatus;
 import com.tiktokinsight.product.domain.ProductSummary;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -34,11 +35,17 @@ public class ProductController {
             @RequestParam(required = false) String market,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String lifecycleStage,
+            @RequestParam(required = false) String recommendation,
+            @RequestParam(required = false) BigDecimal minSelectionScore,
+            @RequestParam(required = false) BigDecimal maxSelectionScore,
             @RequestParam(defaultValue = "collectedAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction
     ) {
-        return ApiResponse.success(service.list(ProductCatalogService.query(
-                page, pageSize, market, categoryId, keyword, ProductStatus.ACTIVE, sortBy, direction
+        return ApiResponse.success(service.list(service.query(
+                page, pageSize, market, categoryId, keyword, ProductStatus.ACTIVE, minPrice, maxPrice, lifecycleStage, recommendation, minSelectionScore, maxSelectionScore, sortBy, direction
         )), RequestIdFilter.currentRequestId());
     }
 
