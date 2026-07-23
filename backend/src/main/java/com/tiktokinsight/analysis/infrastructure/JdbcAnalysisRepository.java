@@ -246,6 +246,16 @@ public class JdbcAnalysisRepository implements AnalysisRepository {
     }
 
     @Override
+    public List<AnalysisTarget> findAllActiveTargets() {
+        return jdbc.query("""
+                SELECT id, market, category_id, latest_stat_date FROM product
+                 WHERE status = 'ACTIVE' AND latest_stat_date IS NOT NULL ORDER BY id ASC
+                """, Map.of(), (resultSet, rowNumber) -> new AnalysisTarget(
+                resultSet.getLong("id"), resultSet.getString("market"), resultSet.getLong("category_id"),
+                resultSet.getObject("latest_stat_date", LocalDate.class)));
+    }
+
+    @Override
     public List<AnalysisJob> findRunnableJobs(Instant now, int limit) {
         return jdbc.query("""
                 SELECT id, product_id, analysis_date, algorithm_version, status, attempt_count, next_retry_at

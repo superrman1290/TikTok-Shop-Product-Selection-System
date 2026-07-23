@@ -1,6 +1,6 @@
 "use client";
 
-import { AppstoreOutlined, BellOutlined, BookOutlined, ImportOutlined, LogoutOutlined, SettingOutlined, ShopOutlined, UserOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, BellOutlined, BookOutlined, DatabaseOutlined, FileSearchOutlined, ImportOutlined, LogoutOutlined, SettingOutlined, ShopOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Select } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -40,6 +40,8 @@ export function AppHeader() {
           {user?.role !== "ADMIN" && <Link href="/alerts"><BellOutlined /> 提醒</Link>}
           {user?.role === "ADMIN" && <Link href="/admin/products"><AppstoreOutlined /> 商品管理</Link>}
           {user?.role === "ADMIN" && <Link href="/admin/imports"><ImportOutlined /> 导入</Link>}
+          {user?.role === "ADMIN" && <Link href="/admin/data-sources"><DatabaseOutlined /> 数据源</Link>}
+          {user?.role === "ADMIN" && <Link href="/admin/audit-logs"><FileSearchOutlined /> 审计</Link>}
           {user?.role === "ADMIN" && <Link href="/admin"><SettingOutlined /> 管理入口</Link>}
           <Link href="/profile"><UserOutlined /> 账号</Link>
           <Button type="text" icon={<LogoutOutlined />} onClick={logout}>退出</Button>

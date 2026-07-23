@@ -17,6 +17,7 @@ public enum ApiErrorCode {
     PRODUCT_NOT_FOUND(40402, "商品不存在"),
     ALERT_RULE_NOT_FOUND(40403, "监控规则不存在"),
     ALERT_NOT_FOUND(40406, "提醒不存在"),
+    DATA_SOURCE_NOT_FOUND(40407, "数据源不存在"),
     IMPORT_JOB_NOT_FOUND(40404, "导入任务不存在"),
     ALGORITHM_VERSION_NOT_FOUND(40405, "算法版本不存在"),
     EMAIL_EXISTS(40901, "邮箱已存在"),
@@ -28,6 +29,7 @@ public enum ApiErrorCode {
     SCORE_CANNOT_BE_CALCULATED(42203, "评分无法计算"),
     MARKET_UNSUPPORTED(42204, "不支持的市场"),
     LOGIN_RATE_LIMITED(42901, "登录尝试过于频繁"),
+    API_RATE_LIMITED(42902, "请求过于频繁"),
     INTERNAL_ERROR(50000, "系统内部错误"),
     DATA_SOURCE_UNAVAILABLE(50301, "数据源不可用"),
     DATA_SOURCE_FORMAT_ERROR(50302, "数据源返回格式错误");

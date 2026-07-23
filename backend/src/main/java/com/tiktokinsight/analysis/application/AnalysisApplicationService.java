@@ -97,6 +97,21 @@ public class AnalysisApplicationService {
         reconcileTargets();
     }
 
+    @Transactional
+    public int scheduleAllActive() {
+        int count = 0;
+        Set<String> benchmarkKeys = new HashSet<>();
+        for (var target : repository.findAllActiveTargets()) {
+            String key = target.market() + ':' + target.categoryId() + ':' + target.analysisDate();
+            if (benchmarkKeys.add(key)) {
+                benchmarkService.recalculate(target.market(), target.categoryId(), target.analysisDate(), activeVersion);
+            }
+            repository.schedule(target.productId(), target.analysisDate(), activeVersion, clock.instant());
+            count++;
+        }
+        return count;
+    }
+
     private void reconcileTargets() {
         Set<String> benchmarkKeys = new HashSet<>();
         for (var target : repository.findRecalculationTargets(activeVersion, 50)) {

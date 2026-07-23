@@ -217,6 +217,11 @@ export interface UserDashboard {
   topSelectionScoreProducts: DashboardProduct[];
 }
 
+export interface AdminDashboard { userCount: number; enabledUserCount: number; productCount: number; newProducts7d: number; importJobs7d: number; importSuccessRate: number; pendingAnalysisJobs: number; failedAnalysisJobs: number; alerts7d: number; }
+export interface AdminUser { id: number; email: string; username: string; role: "USER" | "ADMIN"; status: string; createdAt: string; }
+export interface DataSourceRecord { id: number; name: string; sourceType: string; markets: string[]; endpointUrl?: string; secretHint?: string; enabled: boolean; createdAt: string; updatedAt: string; }
+export interface AuditLog { id: number; operatorEmail?: string; actionType: string; targetType: string; targetId?: string; requestId?: string; requestIp?: string; result: string; detail?: string; createdAt: string; }
+
 interface ApiEnvelope<T> {
   code: number;
   message: string;
@@ -349,6 +354,18 @@ export const userWorkflowApi = {
   markAllAlertsRead(accessToken: string) {
     return request<number>("/api/v1/alerts/read-all", accessToken, { method: "POST" });
   },
+};
+
+export const adminApi = {
+  dashboard: (token: string) => request<AdminDashboard>("/api/v1/admin/dashboard", token),
+  users: (token: string) => request<PageData<AdminUser>>("/api/v1/admin/users?page=1&pageSize=100", token),
+  changeRole: (token: string, id: number, role: "USER" | "ADMIN") => request<AdminUser>(`/api/v1/admin/users/${id}/role`, token, { method: "PUT", body: JSON.stringify({ role }) }),
+  dataSources: (token: string) => request<DataSourceRecord[]>("/api/v1/admin/data-sources", token),
+  saveDataSource: (token: string, input: Omit<DataSourceRecord, "id" | "createdAt" | "updatedAt" | "secretHint"> & { secret?: string }, id?: number) => request<DataSourceRecord>(`/api/v1/admin/data-sources${id ? `/${id}` : ""}`, token, { method: id ? "PUT" : "POST", body: JSON.stringify(input) }),
+  dataSourceStatus: (token: string, id: number, enabled: boolean) => request<DataSourceRecord>(`/api/v1/admin/data-sources/${id}/status?enabled=${enabled}`, token, { method: "PUT" }),
+  analysisJobs: (token: string) => request<PageData<{ id: number; productId: number; analysisDate: string; algorithmVersion: string; status: string; attemptCount: number }>>("/api/v1/admin/jobs/analysis?page=1&pageSize=100", token),
+  recalculate: (token: string) => request<number>("/api/v1/admin/jobs/analysis/recalculate", token, { method: "POST" }),
+  auditLogs: (token: string) => request<PageData<AuditLog>>("/api/v1/admin/audit-logs?page=1&pageSize=100", token),
 };
 
 export const markets = ["US", "GB", "TH", "VN", "PH", "MY", "SG", "ID"];
